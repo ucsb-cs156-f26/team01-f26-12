@@ -1,8 +1,6 @@
 # STARTER-team01
 
-Instructions: <https://ucsb-cs156.github.io/s26/lab/team01.html>
-
-TODO: change heading above to your repo name, e.g. `# team01-s26-17`
+Instructions: <https://github.com/ucsb-cs156-f26/team01-f26-12>
 
 TODO: Add a link to the deployed Dokku app for your team here, e.g.
 
@@ -20,7 +18,7 @@ TODO: Fill in this table with correct information.
 | RecommendationRequest     |              |           |
 | MenuItemReview            |              |           |
 | HelpRequest               |              |           |
-| Articles                  |              |           |
+| Articles                  |              |    grigorzakaryan-glitch   |
 
 Remember though, that in spite of these initial  assignments, it is still
 a team project.  Please help other team members to finish their work
