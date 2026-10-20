@@ -15,7 +15,7 @@ TODO: Fill in this table with correct information.
 |---------------------------|--------------|-----------|
 | UCSBDiningCommonsMenuItem |              |           |
 | UCSBOrganization          |              |           |
-| RecommendationRequest     |              |           |
+| RecommendationRequest     | Matthew A    | mattoa63  |
 | MenuItemReview            |              |           |
 | HelpRequest               |              |           |
 | Articles                  |              |    grigorzakaryan-glitch   |
