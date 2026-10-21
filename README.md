@@ -16,7 +16,7 @@ TODO: Fill in this table with correct information.
 | UCSBDiningCommonsMenuItem |              |           |
 | UCSBOrganization          |              |           |
 | RecommendationRequest     | Matthew A    | mattoa63  |
-| MenuItemReview            |              |           |
+| MenuItemReview            | Ryan Nguyen  |ryanngu-dev|
 | HelpRequest               |              |           |
 | Articles                  |              |    grigorzakaryan-glitch   |
 
