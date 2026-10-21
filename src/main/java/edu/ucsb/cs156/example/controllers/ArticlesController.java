@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.Articles;
+import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.ArticlesRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -73,5 +74,20 @@ public class ArticlesController extends ApiController {
     article.setDateAdded(dateAdded);
 
     return articlesRepository.save(article);
+  }
+
+  /**
+   * Get a single article by id
+   *
+   * @param id the id of the article
+   * @return an Articles
+   */
+  @Operation(summary = "Get a single article")
+  @PreAuthorize("hasRole('ROLE_USER')")
+  @GetMapping("")
+  public Articles getById(@Parameter(name = "id") @RequestParam Long id) {
+    return articlesRepository
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFoundException(Articles.class, id));
   }
 }
