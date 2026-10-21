@@ -284,4 +284,63 @@ public class MenuItemReviewControllerTests extends ControllerTestCase {
     Map<String, Object> json = responseToJson(response);
     assertEquals("MenuItemReview with id 67 not found", json.get("message"));
   }
+
+  // Tests for DELETE /api/menuitemreview?id=...
+
+  @Test
+  public void logged_out_users_cannot_delete() throws Exception {
+    mockMvc.perform(delete("/api/menuitemreview?id=15").with(csrf())).andExpect(status().is(403));
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void logged_in_regular_users_cannot_delete() throws Exception {
+    mockMvc.perform(delete("/api/menuitemreview?id=15").with(csrf())).andExpect(status().is(403));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admin_can_delete_a_menuitemreview() throws Exception {
+    LocalDateTime ldt = LocalDateTime.parse("2022-04-20T00:00:00");
+
+    MenuItemReview review =
+        MenuItemReview.builder()
+            .id(15L)
+            .itemId(7L)
+            .reviewerEmail("cgaucho@ucsb.edu")
+            .stars(5)
+            .dateReviewed(ldt)
+            .comments("Great")
+            .build();
+
+    when(menuItemReviewRepository.findById(eq(15L))).thenReturn(Optional.of(review));
+
+    MvcResult response =
+        mockMvc
+            .perform(delete("/api/menuitemreview?id=15").with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    verify(menuItemReviewRepository, times(1)).findById(15L);
+    verify(menuItemReviewRepository, times(1)).delete(review);
+    Map<String, Object> json = responseToJson(response);
+    assertEquals("MenuItemReview with id 15 deleted", json.get("message"));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admin_tries_to_delete_non_existant_menuitemreview_and_gets_right_error_message()
+      throws Exception {
+    when(menuItemReviewRepository.findById(eq(15L))).thenReturn(Optional.empty());
+
+    MvcResult response =
+        mockMvc
+            .perform(delete("/api/menuitemreview?id=15").with(csrf()))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    verify(menuItemReviewRepository, times(1)).findById(15L);
+    Map<String, Object> json = responseToJson(response);
+    assertEquals("MenuItemReview with id 15 not found", json.get("message"));
+  }
 }
