@@ -17,7 +17,7 @@ TODO: Fill in this table with correct information.
 | UCSBOrganization          |              |           |
 | RecommendationRequest     | Matthew A    | mattoa63  |
 | MenuItemReview            | Ryan Nguyen  |ryanngu-dev|
-| HelpRequest               |              |           |
+| HelpRequest               | Ray Li       |rayli2027  |
 | Articles                  | Red M        | rmacasa-cloud      |
 
 Remember though, that in spite of these initial  assignments, it is still
