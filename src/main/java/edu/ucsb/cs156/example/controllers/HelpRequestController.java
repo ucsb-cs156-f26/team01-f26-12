@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.HelpRequest;
+import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.HelpRequestRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,6 +37,26 @@ public class HelpRequestController extends ApiController {
   public Iterable<HelpRequest> allHelpRequests() {
     Iterable<HelpRequest> helpRequests = helpRequestRepository.findAll();
     return helpRequests;
+  }
+
+  /**
+   * Get a single help request by ID.
+   *
+   * @param id the ID of the help request
+   * @return the matching HelpRequest
+   */
+  @Operation(summary = "Get a single help request by ID")
+  @PreAuthorize("hasRole('ROLE_USER')")
+  @GetMapping("")
+  public HelpRequest getHelpRequestById(
+      @Parameter(name = "id", description = "ID of the help request") @RequestParam Long id) {
+
+    HelpRequest helpRequest =
+        helpRequestRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+    return helpRequest;
   }
 
   /**
