@@ -24,7 +24,8 @@ a team project.  Please help other team members to finish their work
 after completing your own.
 
 # Versions
-* Java: 21
+* Java: 25.0.4 (`25.0.4-tem` in SDKMAN)
+* Maven: 3.9.16
 * node: 20.17.0
 See [docs/versions.md](docs/versions.md) for more information on upgrading versions.
 
