@@ -16,6 +16,8 @@ import edu.ucsb.cs156.example.repositories.UCSBOrganizationRepository;
 import edu.ucsb.cs156.example.repositories.UserRepository;
 import edu.ucsb.cs156.example.testconfig.TestConfig;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -96,6 +98,46 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
     assertEquals(
         mapper.writeValueAsString(organization), response.getResponse().getContentAsString());
     verify(ucsbOrganizationRepository).save(eq(organization));
+  }
+
+  @Test
+  public void logged_out_users_cannot_get_by_id() throws Exception {
+    mockMvc
+        .perform(get("/api/UCSBOrganization").param("orgCode", "SKY"))
+        .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void logged_in_users_can_get_an_existing_organization() throws Exception {
+    UCSBOrganization sky = organization(false);
+    when(ucsbOrganizationRepository.findById(eq("SKY"))).thenReturn(Optional.of(sky));
+
+    MvcResult response =
+        mockMvc
+            .perform(get("/api/UCSBOrganization").param("orgCode", "SKY"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    verify(ucsbOrganizationRepository).findById("SKY");
+    assertEquals(mapper.writeValueAsString(sky), response.getResponse().getContentAsString());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void missing_organizations_return_not_found() throws Exception {
+    when(ucsbOrganizationRepository.findById(eq("MISSING"))).thenReturn(Optional.empty());
+
+    MvcResult response =
+        mockMvc
+            .perform(get("/api/UCSBOrganization").param("orgCode", "MISSING"))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    verify(ucsbOrganizationRepository).findById("MISSING");
+    Map<String, Object> json = responseToJson(response);
+    assertEquals("EntityNotFoundException", json.get("type"));
+    assertEquals("UCSBOrganization with id MISSING not found", json.get("message"));
   }
 
   private UCSBOrganization organization(boolean inactive) {
