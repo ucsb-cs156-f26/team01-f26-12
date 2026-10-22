@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -38,8 +39,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
 
   @MockitoBean UserRepository userRepository;
 
-  // Authorization tests for GET /api/helprequests/all
-
   @Test
   public void logged_out_users_cannot_get_all() throws Exception {
     mockMvc.perform(get("/api/helprequests/all")).andExpect(status().is(403));
@@ -50,8 +49,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
   public void logged_in_users_can_get_all() throws Exception {
     mockMvc.perform(get("/api/helprequests/all")).andExpect(status().is(200));
   }
-
-  // Authorization tests for POST /api/helprequests/post
 
   @Test
   public void logged_out_users_cannot_post() throws Exception {
@@ -83,8 +80,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
                 .with(csrf()))
         .andExpect(status().is(403));
   }
-
-  // Authorization tests for GET /api/helprequests?id=...
 
   @Test
   public void logged_out_users_cannot_get_by_id() throws Exception {
@@ -138,8 +133,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
     assertEquals("EntityNotFoundException", json.get("type"));
     assertEquals("HelpRequest with id 7 not found", json.get("message"));
   }
-
-  // Authorization tests for PUT /api/helprequests?id=...
 
   @Test
   public void logged_out_users_cannot_update() throws Exception {
@@ -270,7 +263,68 @@ public class HelpRequestControllerTests extends ControllerTestCase {
     assertEquals("HelpRequest with id 7 not found", json.get("message"));
   }
 
-  // Tests with mocks for database actions
+  @Test
+  public void logged_out_users_cannot_delete() throws Exception {
+    mockMvc
+        .perform(delete("/api/helprequests").param("id", "7").with(csrf()))
+        .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void logged_in_regular_users_cannot_delete() throws Exception {
+    mockMvc
+        .perform(delete("/api/helprequests").param("id", "7").with(csrf()))
+        .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admin_can_delete_an_existing_help_request() throws Exception {
+    HelpRequest helpRequest =
+        HelpRequest.builder()
+            .requesterEmail("cgaucho@ucsb.edu")
+            .teamId("s22-5pm-3")
+            .tableOrBreakoutRoom("7")
+            .requestTime(LocalDateTime.parse("2022-01-03T00:00:00"))
+            .explanation("Need help with Swagger-ui")
+            .solved(false)
+            .build();
+
+    when(helpRequestRepository.findById(7L)).thenReturn(Optional.of(helpRequest));
+
+    MvcResult response =
+        mockMvc
+            .perform(delete("/api/helprequests").param("id", "7").with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    verify(helpRequestRepository, times(1)).findById(7L);
+    verify(helpRequestRepository, times(1)).delete(helpRequest);
+
+    Map<String, Object> json = responseToJson(response);
+
+    assertEquals("HelpRequest with id 7 deleted", json.get("message"));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admin_cannot_delete_help_request_that_does_not_exist() throws Exception {
+    when(helpRequestRepository.findById(7L)).thenReturn(Optional.empty());
+
+    MvcResult response =
+        mockMvc
+            .perform(delete("/api/helprequests").param("id", "7").with(csrf()))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    verify(helpRequestRepository, times(1)).findById(7L);
+
+    Map<String, Object> json = responseToJson(response);
+
+    assertEquals("EntityNotFoundException", json.get("type"));
+    assertEquals("HelpRequest with id 7 not found", json.get("message"));
+  }
 
   @WithMockUser(roles = {"USER"})
   @Test
