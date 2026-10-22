@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import edu.ucsb.cs156.example.ControllerTestCase;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
@@ -137,6 +139,60 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
     verify(ucsbOrganizationRepository).findById("MISSING");
     Map<String, Object> json = responseToJson(response);
     assertEquals("EntityNotFoundException", json.get("type"));
+    assertEquals("UCSBOrganization with id MISSING not found", json.get("message"));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admins_can_edit_an_existing_organization() throws Exception {
+    UCSBOrganization original = organization(false);
+    UCSBOrganization edited =
+        UCSBOrganization.builder()
+            .orgCode("SKY")
+            .orgTranslationShort("SKYDIVING UPDATED")
+            .orgTranslation("SKYDIVING CLUB AT UCSB UPDATED")
+            .inactive(true)
+            .build();
+    String requestBody = mapper.writeValueAsString(edited);
+    when(ucsbOrganizationRepository.findById(eq("SKY"))).thenReturn(Optional.of(original));
+
+    MvcResult response =
+        mockMvc
+            .perform(
+                put("/api/UCSBOrganization")
+                    .param("orgCode", "SKY")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding("utf-8")
+                    .content(requestBody)
+                    .with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    verify(ucsbOrganizationRepository).findById("SKY");
+    verify(ucsbOrganizationRepository).save(edited);
+    assertEquals(requestBody, response.getResponse().getContentAsString());
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admins_cannot_edit_a_missing_organization() throws Exception {
+    String requestBody = mapper.writeValueAsString(organization(true));
+    when(ucsbOrganizationRepository.findById(eq("MISSING"))).thenReturn(Optional.empty());
+
+    MvcResult response =
+        mockMvc
+            .perform(
+                put("/api/UCSBOrganization")
+                    .param("orgCode", "MISSING")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding("utf-8")
+                    .content(requestBody)
+                    .with(csrf()))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    verify(ucsbOrganizationRepository).findById("MISSING");
+    Map<String, Object> json = responseToJson(response);
     assertEquals("UCSBOrganization with id MISSING not found", json.get("message"));
   }
 

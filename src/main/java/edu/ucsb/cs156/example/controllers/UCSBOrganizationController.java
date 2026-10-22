@@ -6,11 +6,14 @@ import edu.ucsb.cs156.example.repositories.UCSBOrganizationRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,5 +88,31 @@ public class UCSBOrganizationController extends ApiController {
     organization.setOrgTranslation(orgTranslation);
     organization.setInactive(inactive);
     return ucsbOrganizationRepository.save(organization);
+  }
+
+  /**
+   * Updates an organization's fields while retaining its organization code.
+   *
+   * @param orgCode the code of the organization to update
+   * @param incoming the new organization field values
+   * @return the updated organization
+   */
+  @Operation(summary = "Update a UCSB organization (admin only)")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PutMapping("")
+  public UCSBOrganization updateOrganization(
+      @Parameter(description = "Organization code to update", example = "SKY") @RequestParam
+          String orgCode,
+      @RequestBody @Valid UCSBOrganization incoming) {
+    UCSBOrganization organization =
+        ucsbOrganizationRepository
+            .findById(orgCode)
+            .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+
+    organization.setOrgTranslationShort(incoming.getOrgTranslationShort());
+    organization.setOrgTranslation(incoming.getOrgTranslation());
+    organization.setInactive(incoming.getInactive());
+    ucsbOrganizationRepository.save(organization);
+    return organization;
   }
 }
