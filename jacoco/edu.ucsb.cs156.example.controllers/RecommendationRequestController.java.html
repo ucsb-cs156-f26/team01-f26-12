@@ -7,6 +7,7 @@ import edu.ucsb.cs156.example.repositories.RecommendationRequestRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = &quot;RecommendationRequest&quot;)
 @RequestMapping(&quot;/api/recommendationrequests&quot;)
 @RestController
-<span class="fc" id="L24">@Slf4j</span>
-<span class="fc" id="L25">public class RecommendationRequestController extends ApiController {</span>
+<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L28">public class RecommendationRequestController extends ApiController {</span>
 
   @Autowired RecommendationRequestRepository recommendationRequestRepository;
 
@@ -30,19 +33,19 @@ import org.springframework.web.bind.annotation.RestController;
   @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
   @GetMapping(&quot;/all&quot;)
   public Iterable&lt;RecommendationRequest&gt; allRecommendationRequests() {
-<span class="fc" id="L33">    Iterable&lt;RecommendationRequest&gt; recommendations = recommendationRequestRepository.findAll();</span>
-<span class="fc" id="L34">    return recommendations;</span>
+<span class="fc" id="L36">    Iterable&lt;RecommendationRequest&gt; recommendations = recommendationRequestRepository.findAll();</span>
+<span class="fc" id="L37">    return recommendations;</span>
   }
 
   @Operation(summary = &quot;Get a single recommendation request&quot;)
   @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
   @GetMapping(&quot;&quot;)
   public RecommendationRequest getById(@Parameter(name = &quot;id&quot;) @RequestParam Long id) {
-<span class="fc" id="L41">    RecommendationRequest recommendationRequest =</span>
+<span class="fc" id="L44">    RecommendationRequest recommendationRequest =</span>
         recommendationRequestRepository
-<span class="fc" id="L43">            .findById(id)</span>
-<span class="fc" id="L44">            .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
-<span class="fc" id="L45">    return recommendationRequest;</span>
+<span class="fc" id="L46">            .findById(id)</span>
+<span class="fc" id="L47">            .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
+<span class="fc" id="L48">    return recommendationRequest;</span>
   }
 
   @Operation(summary = &quot;Create a new recommendation request&quot;)
@@ -68,21 +71,44 @@ import org.springframework.web.bind.annotation.RestController;
           LocalDateTime dateNeeded,
       @Parameter(name = &quot;done&quot;) @RequestParam boolean done)
       throws JsonProcessingException {
-<span class="fc" id="L71">    log.info(&quot;dateRequested={}&quot;, dateRequested);</span>
-<span class="fc" id="L72">    log.info(&quot;dateNeeded={}&quot;, dateNeeded);</span>
+<span class="fc" id="L74">    log.info(&quot;dateRequested={}&quot;, dateRequested);</span>
+<span class="fc" id="L75">    log.info(&quot;dateNeeded={}&quot;, dateNeeded);</span>
 
-<span class="fc" id="L74">    RecommendationRequest recommendationRequest = new RecommendationRequest();</span>
-<span class="fc" id="L75">    recommendationRequest.setRequesterEmail(requesterEmail);</span>
-<span class="fc" id="L76">    recommendationRequest.setProfessorEmail(professorEmail);</span>
-<span class="fc" id="L77">    recommendationRequest.setExplanation(explanation);</span>
-<span class="fc" id="L78">    recommendationRequest.setDateRequested(dateRequested);</span>
-<span class="fc" id="L79">    recommendationRequest.setDateNeeded(dateNeeded);</span>
-<span class="fc" id="L80">    recommendationRequest.setDone(done);</span>
+<span class="fc" id="L77">    RecommendationRequest recommendationRequest = new RecommendationRequest();</span>
+<span class="fc" id="L78">    recommendationRequest.setRequesterEmail(requesterEmail);</span>
+<span class="fc" id="L79">    recommendationRequest.setProfessorEmail(professorEmail);</span>
+<span class="fc" id="L80">    recommendationRequest.setExplanation(explanation);</span>
+<span class="fc" id="L81">    recommendationRequest.setDateRequested(dateRequested);</span>
+<span class="fc" id="L82">    recommendationRequest.setDateNeeded(dateNeeded);</span>
+<span class="fc" id="L83">    recommendationRequest.setDone(done);</span>
 
-<span class="fc" id="L82">    RecommendationRequest savedRecommendationRequest =</span>
-<span class="fc" id="L83">        recommendationRequestRepository.save(recommendationRequest);</span>
+<span class="fc" id="L85">    RecommendationRequest savedRecommendationRequest =</span>
+<span class="fc" id="L86">        recommendationRequestRepository.save(recommendationRequest);</span>
 
-<span class="fc" id="L85">    return savedRecommendationRequest;</span>
+<span class="fc" id="L88">    return savedRecommendationRequest;</span>
+  }
+
+  @Operation(summary = &quot;Update a single recommendation request&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+  @PutMapping(&quot;&quot;)
+  public RecommendationRequest updateRecommendationRequest(
+      @Parameter(name = &quot;id&quot;) @RequestParam Long id,
+      @RequestBody @Valid RecommendationRequest incoming) {
+<span class="fc" id="L97">    RecommendationRequest recommendationRequest =</span>
+        recommendationRequestRepository
+<span class="fc" id="L99">            .findById(id)</span>
+<span class="fc" id="L100">            .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
+
+<span class="fc" id="L102">    recommendationRequest.setRequesterEmail(incoming.getRequesterEmail());</span>
+<span class="fc" id="L103">    recommendationRequest.setProfessorEmail(incoming.getProfessorEmail());</span>
+<span class="fc" id="L104">    recommendationRequest.setExplanation(incoming.getExplanation());</span>
+<span class="fc" id="L105">    recommendationRequest.setDateRequested(incoming.getDateRequested());</span>
+<span class="fc" id="L106">    recommendationRequest.setDateNeeded(incoming.getDateNeeded());</span>
+<span class="fc" id="L107">    recommendationRequest.setDone(incoming.getDone());</span>
+
+<span class="fc" id="L109">    recommendationRequestRepository.save(recommendationRequest);</span>
+
+<span class="fc" id="L111">    return recommendationRequest;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
