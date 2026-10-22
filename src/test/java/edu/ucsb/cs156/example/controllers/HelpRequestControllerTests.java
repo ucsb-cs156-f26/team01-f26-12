@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import edu.ucsb.cs156.example.ControllerTestCase;
@@ -21,8 +22,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
@@ -136,12 +139,142 @@ public class HelpRequestControllerTests extends ControllerTestCase {
     assertEquals("HelpRequest with id 7 not found", json.get("message"));
   }
 
+  // Authorization tests for PUT /api/helprequests?id=...
+
+  @Test
+  public void logged_out_users_cannot_update() throws Exception {
+    mockMvc
+        .perform(
+            put("/api/helprequests")
+                .param("id", "7")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .with(csrf()))
+        .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void logged_in_regular_users_cannot_update() throws Exception {
+    mockMvc
+        .perform(
+            put("/api/helprequests")
+                .param("id", "7")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .with(csrf()))
+        .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admin_can_update_an_existing_help_request() throws Exception {
+    LocalDateTime originalRequestTime = LocalDateTime.parse("2022-01-03T00:00:00");
+    LocalDateTime updatedRequestTime = LocalDateTime.parse("2023-01-03T00:00:00");
+
+    HelpRequest originalHelpRequest =
+        HelpRequest.builder()
+            .requesterEmail("cgaucho@ucsb.edu")
+            .teamId("s22-5pm-3")
+            .tableOrBreakoutRoom("7")
+            .requestTime(originalRequestTime)
+            .explanation("Need help with Swagger-ui")
+            .solved(false)
+            .build();
+
+    HelpRequest updatedHelpRequest =
+        HelpRequest.builder()
+            .requesterEmail("updated@ucsb.edu")
+            .teamId("f23-10am-2")
+            .tableOrBreakoutRoom("12")
+            .requestTime(updatedRequestTime)
+            .explanation("Updated explanation")
+            .solved(true)
+            .build();
+
+    String requestBody = mapper.writeValueAsString(updatedHelpRequest);
+
+    when(helpRequestRepository.findById(7L)).thenReturn(Optional.of(originalHelpRequest));
+
+    MvcResult response =
+        mockMvc
+            .perform(
+                put("/api/helprequests")
+                    .param("id", "7")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding("utf-8")
+                    .content(requestBody)
+                    .with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    verify(helpRequestRepository, times(1)).findById(7L);
+
+    ArgumentCaptor<HelpRequest> captor = ArgumentCaptor.forClass(HelpRequest.class);
+    verify(helpRequestRepository, times(1)).save(captor.capture());
+
+    HelpRequest savedHelpRequest = captor.getValue();
+
+    assertEquals("updated@ucsb.edu", savedHelpRequest.getRequesterEmail());
+    assertEquals("f23-10am-2", savedHelpRequest.getTeamId());
+    assertEquals("12", savedHelpRequest.getTableOrBreakoutRoom());
+    assertEquals(updatedRequestTime, savedHelpRequest.getRequestTime());
+    assertEquals("Updated explanation", savedHelpRequest.getExplanation());
+    assertEquals(true, savedHelpRequest.getSolved());
+
+    String responseString = response.getResponse().getContentAsString();
+    Map<String, Object> responseJson = mapper.readValue(responseString, Map.class);
+
+    assertEquals("updated@ucsb.edu", responseJson.get("requesterEmail"));
+    assertEquals("f23-10am-2", responseJson.get("teamId"));
+    assertEquals("12", responseJson.get("tableOrBreakoutRoom"));
+    assertEquals("2023-01-03T00:00:00", responseJson.get("requestTime"));
+    assertEquals("Updated explanation", responseJson.get("explanation"));
+    assertEquals(true, responseJson.get("solved"));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admin_cannot_update_help_request_that_does_not_exist() throws Exception {
+    HelpRequest updatedHelpRequest =
+        HelpRequest.builder()
+            .requesterEmail("updated@ucsb.edu")
+            .teamId("f23-10am-2")
+            .tableOrBreakoutRoom("12")
+            .requestTime(LocalDateTime.parse("2023-01-03T00:00:00"))
+            .explanation("Updated explanation")
+            .solved(true)
+            .build();
+
+    String requestBody = mapper.writeValueAsString(updatedHelpRequest);
+
+    when(helpRequestRepository.findById(7L)).thenReturn(Optional.empty());
+
+    MvcResult response =
+        mockMvc
+            .perform(
+                put("/api/helprequests")
+                    .param("id", "7")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding("utf-8")
+                    .content(requestBody)
+                    .with(csrf()))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    verify(helpRequestRepository, times(1)).findById(7L);
+
+    Map<String, Object> json = responseToJson(response);
+
+    assertEquals("EntityNotFoundException", json.get("type"));
+    assertEquals("HelpRequest with id 7 not found", json.get("message"));
+  }
+
   // Tests with mocks for database actions
 
   @WithMockUser(roles = {"USER"})
   @Test
   public void logged_in_user_can_get_all_helprequests() throws Exception {
-    // Arrange
     LocalDateTime requestTime1 = LocalDateTime.parse("2022-01-03T00:00:00");
     LocalDateTime requestTime2 = LocalDateTime.parse("2022-03-11T00:00:00");
 
@@ -170,11 +303,9 @@ public class HelpRequestControllerTests extends ControllerTestCase {
 
     when(helpRequestRepository.findAll()).thenReturn(expectedHelpRequests);
 
-    // Act
     MvcResult response =
         mockMvc.perform(get("/api/helprequests/all")).andExpect(status().isOk()).andReturn();
 
-    // Assert
     verify(helpRequestRepository, times(1)).findAll();
 
     String expectedJson = mapper.writeValueAsString(expectedHelpRequests);
@@ -186,7 +317,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
   public void an_admin_user_can_post_a_new_helprequest() throws Exception {
-    // Arrange
     LocalDateTime requestTime = LocalDateTime.parse("2022-01-03T00:00:00");
 
     HelpRequest helpRequest =
@@ -201,7 +331,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
 
     when(helpRequestRepository.save(eq(helpRequest))).thenReturn(helpRequest);
 
-    // Act
     MvcResult response =
         mockMvc
             .perform(
@@ -216,7 +345,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
             .andExpect(status().isOk())
             .andReturn();
 
-    // Assert
     verify(helpRequestRepository, times(1)).save(helpRequest);
 
     String expectedJson = mapper.writeValueAsString(helpRequest);
