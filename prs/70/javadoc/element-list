@@ -10,5 +10,3 @@ edu.ucsb.cs156.example.repositories
 edu.ucsb.cs156.example.services
 edu.ucsb.cs156.example.services.jobs
 edu.ucsb.cs156.example.services.wiremock
-entities
-repositories
