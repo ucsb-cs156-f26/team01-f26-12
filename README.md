@@ -1,13 +1,14 @@
-# STARTER-team01
+# team01-f26-12
 
-Instructions: <https://github.com/ucsb-cs156-f26/team01-f26-12>
-
-TODO: Add a link to the deployed Dokku app for your team here, e.g.
+* Assignment instructions: <https://ucsb-cs156.github.io/f26/lab/team01.html>
+* Source repository: <https://github.com/ucsb-cs156-f26/team01-f26-12>
+* Project board: <https://github.com/orgs/ucsb-cs156-f26/projects/14>
+* Documentation and test coverage: <https://ucsb-cs156-f26.github.io/team01-f26-12/>
 
 Deployments:
 
-* Prod: <https://team01.dokku-17.cs.ucsb.edu>
-* QA: <https://team01-qa.dokku-17.cs.ucsb.edu>
+* Prod: <https://team01.dokku-12.cs.ucsb.edu>
+* QA: <https://team01-qa.dokku-12.cs.ucsb.edu>
 
 | Table                     | Name         | Github Id |
 |---------------------------|--------------|-----------|
@@ -26,21 +27,6 @@ after completing your own.
 * Java: 21
 * node: 20.17.0
 See [docs/versions.md](docs/versions.md) for more information on upgrading versions.
-
-# Brief overview of starter code 
-
-TODO: remove this header and content of this section before submitting.
-However leave the section `# Overview of application` and its content 
-intact.
-
-The starter code here starts with a base similar to `team01`, but with 
-some extra frontend code on top of the of backend CRUD operations
-that were present in `team01`.
-
-You can use this code as a basis to:
-* Add the backend code from team01 *in stages* as suggested in the issues (doing that in "one giant pull request" is *not recommended) 
-* Add a frontend on top of the backend CRUD features you added in team01, using the existing
-  code as examples.
 
 # Overview of application
 
