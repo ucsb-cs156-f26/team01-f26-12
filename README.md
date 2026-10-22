@@ -9,16 +9,14 @@ Deployments:
 * Prod: <https://team01.dokku-17.cs.ucsb.edu>
 * QA: <https://team01-qa.dokku-17.cs.ucsb.edu>
 
-TODO: Fill in this table with correct information. 
-
 | Table                     | Name         | Github Id |
 |---------------------------|--------------|-----------|
-| UCSBDiningCommonsMenuItem |              |           |
-| UCSBOrganization          |              |           |
-| RecommendationRequest     |              |           |
-| MenuItemReview            |              |           |
-| HelpRequest               |              |           |
-| Articles                  |              |    grigorzakaryan-glitch   |
+| UCSBOrganization | Grigor Z     |grigorzakaryan-glitch|
+| UCSBDiningCommonsMenuItem          | Adrien T     |adrientran |
+| RecommendationRequest     | Matthew A    | mattoa63  |
+| MenuItemReview            | Ryan Nguyen  |ryanngu-dev|
+| HelpRequest               | Ray Li       |rayli2027  |
+| Articles                  | Red M        | rmacasa-cloud      |
 
 Remember though, that in spite of these initial  assignments, it is still
 a team project.  Please help other team members to finish their work
