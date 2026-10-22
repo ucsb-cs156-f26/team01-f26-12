@@ -1,6 +1,6 @@
 package edu.ucsb.cs156.example.repositories;
 
-import edu.ucsb.cs156.example.entities.UCSBDiningCommonsMenuItems;
+import edu.ucsb.cs156.example.entities.UCSBDiningCommonsMenuItem;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 /** The UCSBDateRepository is a repository for UCSBDate entities. */
 @Repository
 @RepositoryRestResource(exported = false)
-public interface UCSBDiningCommonsMenuItemsRepository
-    extends CrudRepository<UCSBDiningCommonsMenuItems, Long> {
+public interface UCSBDiningCommonsMenuItemRepository
+    extends CrudRepository<UCSBDiningCommonsMenuItem, Long> {
   //   /**
   //    * This method returns all UCSBDate entities with a given quarterYYYYQ.
   //    *

@@ -2,7 +2,7 @@
     "databaseChangeLog": [
       {
         "changeSet": {
-          "id": "UCSBDiningCommonsMenuItems-1",
+          "id": "UCSBDiningCommonsMenuItem-1",
           "author": "AdrienTran",
           "preConditions": [
             {
@@ -12,7 +12,7 @@
               "not": [
                 {
                   "tableExists": {
-                    "tableName": "UCSBDININGCOMMONSMENUITEMS"
+                    "tableName": "UCSBDININGCOMMONSMENUITEM"
                   }
                 }
               ]
@@ -27,7 +27,7 @@
                       "autoIncrement": true,
                       "constraints": {
                         "primaryKey": true,
-                        "primaryKeyName": "UCSBDININGCOMMONSMENUITEMS_PK"
+                        "primaryKeyName": "UCSBDININGCOMMONSMENUITEM_PK"
                       },
                       "name": "ID",
                       "type": "BIGINT"
@@ -52,7 +52,7 @@
                     }
                   }
                 ],
-                "tableName": "UCSBDININGCOMMONSMENUITEMS"
+                "tableName": "UCSBDININGCOMMONSMENUITEM"
               }
             }
           ]
