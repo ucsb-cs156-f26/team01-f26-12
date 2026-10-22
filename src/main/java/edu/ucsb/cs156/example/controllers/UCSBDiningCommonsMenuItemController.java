@@ -1,7 +1,6 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.UCSBDiningCommonsMenuItem;
-import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.UCSBDiningCommonsMenuItemRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,24 +37,6 @@ public class UCSBDiningCommonsMenuItemController extends ApiController {
   }
 
   /**
-   * Get a single menu item by id
-   *
-   * @param id the id of the menu item
-   * @return a UCSBDiningCommonsMenuItem
-   */
-  @Operation(summary = "Get a single ucsb dining commons menu item")
-  @PreAuthorize("hasRole('ROLE_USER')")
-  @GetMapping("")
-  public UCSBDiningCommonsMenuItem getById(@Parameter(name = "id") @RequestParam Long id) {
-    UCSBDiningCommonsMenuItem menuItem =
-        ucsbDiningCommonsMenuItemRepository
-            .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(UCSBDiningCommonsMenuItem.class, id));
-
-    return menuItem;
-  }
-
-  /**
    * Create a new menu item
    *
    * @param diningCommonsCode the code of the dining commons
@@ -80,24 +60,5 @@ public class UCSBDiningCommonsMenuItemController extends ApiController {
     UCSBDiningCommonsMenuItem savedMenuItem = ucsbDiningCommonsMenuItemRepository.save(menuItem);
 
     return savedMenuItem;
-  }
-
-  /**
-   * Delete a UCSBDiningCommonsMenuItem
-   *
-   * @param id the id of the menu item to delete
-   * @return a message indicating the menu item was deleted
-   */
-  @Operation(summary = "Delete a ucsb dining commons menu item")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
-  @DeleteMapping("")
-  public Object deleteUCSBDiningCommonsMenuItem(@Parameter(name = "id") @RequestParam Long id) {
-    UCSBDiningCommonsMenuItem menuItem =
-        ucsbDiningCommonsMenuItemRepository
-            .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(UCSBDiningCommonsMenuItem.class, id));
-
-    ucsbDiningCommonsMenuItemRepository.delete(menuItem);
-    return genericMessage("UCSBDiningCommonsMenuItem with id %s deleted".formatted(id));
   }
 }
