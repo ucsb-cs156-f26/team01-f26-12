@@ -1,9 +1,9 @@
-package src.main.java.repositories;
+package edu.ucsb.cs156.example.repositories;
 
+import edu.ucsb.cs156.example.entities.RecommendationRequest;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
-import src.main.java.entities.RecommendationRequest;
 
 @Repository
 @RepositoryRestResource(exported = false)
