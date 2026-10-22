@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -188,6 +189,40 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
                     .characterEncoding("utf-8")
                     .content(requestBody)
                     .with(csrf()))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    verify(ucsbOrganizationRepository).findById("MISSING");
+    Map<String, Object> json = responseToJson(response);
+    assertEquals("UCSBOrganization with id MISSING not found", json.get("message"));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admins_can_delete_an_existing_organization() throws Exception {
+    UCSBOrganization sky = organization(false);
+    when(ucsbOrganizationRepository.findById(eq("SKY"))).thenReturn(Optional.of(sky));
+
+    MvcResult response =
+        mockMvc
+            .perform(delete("/api/UCSBOrganization").param("orgCode", "SKY").with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    verify(ucsbOrganizationRepository).findById("SKY");
+    verify(ucsbOrganizationRepository).delete(sky);
+    Map<String, Object> json = responseToJson(response);
+    assertEquals("UCSBOrganization with id SKY deleted", json.get("message"));
+  }
+
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  @Test
+  public void admins_cannot_delete_a_missing_organization() throws Exception {
+    when(ucsbOrganizationRepository.findById(eq("MISSING"))).thenReturn(Optional.empty());
+
+    MvcResult response =
+        mockMvc
+            .perform(delete("/api/UCSBOrganization").param("orgCode", "MISSING").with(csrf()))
             .andExpect(status().isNotFound())
             .andReturn();
 
