@@ -13,8 +13,8 @@ TODO: Fill in this table with correct information.
 
 | Table                     | Name         | Github Id |
 |---------------------------|--------------|-----------|
-| UCSBDiningCommonsMenuItem |              |           |
-| UCSBOrganization          | Adrien T     |adrientran |
+| UCSBOrganization | Grigor Z     |grigorzakaryan-glitch|
+| UCSBDiningCommonsMenuItem          | Adrien T     |adrientran |
 | RecommendationRequest     | Matthew A    | mattoa63  |
 | MenuItemReview            | Ryan Nguyen  |ryanngu-dev|
 | HelpRequest               | Ray Li       |rayli2027  |
