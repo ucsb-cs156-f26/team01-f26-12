@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.UCSBOrganization;
+import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.UCSBOrganizationRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** REST endpoints for listing and creating UCSB organizations. */
+/** REST endpoints for UCSB organizations. */
 @Tag(name = "UCSBOrganization")
 @RequestMapping("/api/UCSBOrganization")
 @RestController
@@ -33,6 +34,25 @@ public class UCSBOrganizationController extends ApiController {
   @GetMapping("/all")
   public Iterable<UCSBOrganization> allOrganizations() {
     return ucsbOrganizationRepository.findAll();
+  }
+
+  /**
+   * Returns a single organization by its organization code.
+   *
+   * @param orgCode the organization's unique code
+   * @return the matching organization
+   */
+  @Operation(summary = "Get a single UCSB organization by code")
+  @PreAuthorize("hasRole('ROLE_USER')")
+  @GetMapping("")
+  public UCSBOrganization getById(
+      @Parameter(description = "Organization code to look up", example = "SKY") @RequestParam
+          String orgCode) {
+    UCSBOrganization organization =
+        ucsbOrganizationRepository
+            .findById(orgCode)
+            .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+    return organization;
   }
 
   /**
