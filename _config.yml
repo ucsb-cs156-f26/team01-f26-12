@@ -23,4 +23,4 @@ repo_name: "TBD"
 repo: ucsb-cs156-f26/team01-f26-12
 owner: ucsb-cs156-f26
 repo_name: team01-f26-12
-pull_requests: [{"author":{"id":"U_kgDODwB0ng","is_bot":false,"login":"mattoa63","name":"matt"},"headRefName":"maRecommendationRequest-create-db","number":81,"title":"Add entity, repository, migration for recommendation requests","url":"https://github.com/ucsb-cs156-f26/team01-f26-12/pull/81"}]
+pull_requests: [{"author":{"id":"U_kgDODwB0ng","is_bot":false,"login":"mattoa63","name":"matt"},"headRefName":"maRecommendationRequest-create-db","number":82,"title":"Add database for recommendation requests","url":"https://github.com/ucsb-cs156-f26/team01-f26-12/pull/82"}]
