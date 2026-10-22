@@ -133,6 +133,55 @@ public class UCSBDiningCommonsMenuItemControllerTests extends ControllerTestCase
 
   @WithMockUser(roles = {"USER"})
   @Test
+  public void test_that_logged_in_user_can_get_by_id_when_the_id_exists() throws Exception {
+
+    // arrange
+    UCSBDiningCommonsMenuItem item =
+        UCSBDiningCommonsMenuItem.builder()
+            .diningCommonsCode("ortega")
+            .name("Pizza")
+            .station("Entrees")
+            .build();
+
+    when(ucsbDiningCommonsMenuItemRepository.findById(eq(7L))).thenReturn(Optional.of(item));
+
+    // act
+    MvcResult response =
+        mockMvc
+            .perform(get("/api/ucsbdiningcommonsmenuitem").param("id", "7"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    // assert
+    verify(ucsbDiningCommonsMenuItemRepository, times(1)).findById(eq(7L));
+    String expectedJson = mapper.writeValueAsString(item);
+    String responseString = response.getResponse().getContentAsString();
+    assertEquals(expectedJson, responseString);
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
+  public void test_that_logged_in_user_can_get_by_id_when_the_id_does_not_exist() throws Exception {
+
+    // arrange
+    when(ucsbDiningCommonsMenuItemRepository.findById(eq(7L))).thenReturn(Optional.empty());
+
+    // act
+    MvcResult response =
+        mockMvc
+            .perform(get("/api/ucsbdiningcommonsmenuitem").param("id", "7"))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+    // assert
+    verify(ucsbDiningCommonsMenuItemRepository, times(1)).findById(eq(7L));
+    Map<String, Object> json = responseToJson(response);
+    assertEquals("EntityNotFoundException", json.get("type"));
+    assertEquals("UCSBDiningCommonsMenuItem with id 7 not found", json.get("message"));
+  }
+
+  @WithMockUser(roles = {"USER"})
+  @Test
   public void logged_in_user_can_get_all_ucsbdiningcommonsmenuitems() throws Exception {
 
     // arrange
